@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	"github.com/rendyfebry/go-streamer/service"
 )
 
 // HTTPError ...
@@ -13,26 +15,30 @@ type HTTPError struct {
 	Message string
 }
 
-func MakeHTTPRoutes() http.Handler {
+func MakeHTTPRoutes(svc service.SomeService) http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", MakeIndexHandler())
-	r.HandleFunc("/health", MakeHealthHandler())
+	r.HandleFunc("/", MakeIndexHandler(svc))
+	r.HandleFunc("/health", MakeHealthHandler(svc))
 
 	return r
 }
 
 // MakeIndexHandler ...
-func MakeIndexHandler() http.HandlerFunc {
+func MakeIndexHandler(svc service.SomeService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Index route"))
+		data, _ := svc.GetIndex()
+
+		w.Write([]byte(data))
 	})
 }
 
 // MakeHealthHandler ...
-func MakeHealthHandler() http.HandlerFunc {
+func MakeHealthHandler(svc service.SomeService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Health route"))
+		data, _ := svc.GetHealth()
+
+		w.Write([]byte(data))
 	})
 }
 

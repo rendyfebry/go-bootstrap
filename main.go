@@ -9,19 +9,24 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/rendyfebry/go-streamer/service"
 	"github.com/rendyfebry/go-streamer/transport"
+	"github.com/rendyfebry/go-streamer/utils"
 )
 
 func main() {
-	env := "dev"
-	host := "localhost"
-	port := 3000
+	// Init config
+	cfg := utils.GetConfig()
 
-	routes := transport.MakeHTTPRoutes()
+	// Init service
+	svc := service.NewService(cfg)
 
-	// Initialize http serve
+	// Init http transport route
+	routes := transport.MakeHTTPRoutes(svc)
+
+	// Init http server
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", host, port),
+		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
@@ -29,8 +34,8 @@ func main() {
 	}
 
 	log.Println("Starting!")
-	log.Printf("- Environment %s \n", env)
-	log.Printf("- Application URL http://%s:%d \n", host, port)
+	log.Printf("- Environment %s \n", cfg.Env)
+	log.Printf("- Application URL http://%s:%d \n", cfg.Host, cfg.Port)
 
 	// Run server in goroutine
 	go func() {
